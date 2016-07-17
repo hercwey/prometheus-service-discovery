@@ -1,0 +1,115 @@
+* Overview
+
+Auto discover monitoring node such as node exporter, then add it to prometheus target.
+
+This application contains two parts, ZkHttpServer and ServiceDiscoveryClient.
+
+* ZkHttpServer
+
+When a node exporter start, send a http post to ZkHttpServer, ZkHttpServer persist the post content to zookeeper node. Post content contain node exporter port and data. Zk Node path name = [srcip]:[port], Zk Node data = [postcontent].
+
+* ServiceDiscoveryClient
+
+Scan zookeeper every 5 minutes, if node path(in the format of ip:port, aka. 1.1.1.1:9100) is tcp reachable, add it to prometheus monitoring node list.
+
+* Flowchart
+
+#+BEGIN_CENTER
+#+ATTR_LATEX: :float t :placement [H] :width 6cm
+file:./MonitoringArchitecture.png
+#+END_CENTER
+
+* Prometheus configuration
+
+#+BEGIN_SRC yaml
+# my global config
+global:
+  scrape_interval:     15s # By default, scrape targets every 15 seconds.
+  evaluation_interval: 15s # By default, scrape targets every 15 seconds.
+  # scrape_timeout is set to the global default (10s).
+
+  # Attach these labels to any time series or alerts when communicating with
+  # external systems (federation, remote storage, Alertmanager).
+  external_labels:
+      monitor: 'codelab-monitor'
+
+# Load and evaluate rules in this file every 'evaluation_interval' seconds.
+rule_files:
+  # - "first.rules"
+  # - "second.rules"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: 'prometheus'
+
+    # Override the global default and scrape targets from this job every 5 seconds.
+    scrape_interval: 15s
+
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    #
+    static_configs:
+      - targets: ['localhost:9090']
+
+    file_sd_configs:
+      - files: ['tgroups/*.json']
+#+END_SRC
+
+* Node exporter startup script
+
+#+BEGIN_SRC sh
+#!bin/sh
+# start node_exporter for prometheus with certain modules enabled
+
+pid=`pidof node_exporter`
+if [[ X"" = X"$pid" ]]; then
+    echo "node_exporter not start"
+else
+    echo "killing node_exporter ..."
+    kill -9 $pid
+fi
+workdir=`pwd`
+cd $workdir
+nohup ./node_exporter -collectors.enabled conntrack,diskstats,entropy,filefd,filesystem,loadavg,mdadm,meminfo,netdev,netstat,sockstat,stat,textfile,time,uname,vmstat,tcpstat &
+curl -i -X POST -d '{"port": "9100", "data": "linux"}' -H "Content-Type: application/json" http://172.16.10.50/zk
+#+END_SRC
+
+* node exporter shutdown script
+
+#+BEGIN_SRC sh
+#!bin/sh
+# stop node_exporter for prometheus
+
+pid=`pidof node_exporter`
+if [[ X"" = X"$pid" ]]; then
+    echo "node_exporter not start"
+else
+    echo "killing node_exporter ..."
+    kill -9 $pid
+fi
+workdir=`pwd`
+cd $workdir
+curl -i -X DELETE -d '{"port": "9100", "data": "linux"}' -H "Content-Type: application/json" http://172.16.10.50/zk
+#+END_SRC
+* Json output By ServiceDisvoeryClient
+
+#+begin_src javascript
+[ {
+  "targets" : [ "172.16.6.102:9101", "172.16.11.151:9101", "172.16.11.152:9101", "172.16.6.101:9101" ],
+  "labels" : {
+    "job" : "haproxy"
+  }
+}, {
+  "targets" : [ "172.16.11.151:9100", "172.16.6.112:9100", "172.16.11.152:9100", "172.16.6.116:9100", "172.16.11.184:9100", "172.16.6.102:9100", "172.16.11.182:9100", "172.16.11.197:9100", "172.16.6.115:9100", "172.16.6.113:9100", "172.16.6.109:9100", "172.16.11.181:9100", "172.16.11.194:9100", "172.16.6.104:9100", "172.16.6.151:9100", "172.16.6.101:9100", "172.16.11.183:9100", "172.16.11.185:9100", "172.16.6.103:9100", "172.16.6.152:9100", "172.16.11.3:9100", "172.16.6.110:9100", "172.16.6.111:9100" ],
+  "labels" : {
+    "job" : "linux"
+  }
+}, {
+  "targets" : [ "172.16.6.112:9104", "172.16.11.184:9104", "172.16.11.183:9104", "172.16.6.111:9104" ],
+  "labels" : {
+    "job" : "mysql"
+  }
+} ]
+#+END_SRC
