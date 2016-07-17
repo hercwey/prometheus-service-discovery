@@ -1,12 +1,12 @@
 * Overview
 
-Auto discover monitoring node such as node exporter, then add it to prometheus target.
+Auto discover monitoring node such as prometheus node exporter, then add it to prometheus target.
 
 This application contains two parts, ZkHttpServer and ServiceDiscoveryClient.
 
 * ZkHttpServer
 
-When a node exporter start, send a http post to ZkHttpServer, ZkHttpServer persist the post content to zookeeper node. Post content contain node exporter port and data. Zk Node path name = [srcip]:[port], Zk Node data = [postcontent].
+When a node exporter start, it send a http post to ZkHttpServer, ZkHttpServer persist the post content to zookeeper. Post content contain two fields: port and data. Zk Node path name is in format of [srcip]:[port], Zk Node data is the data field of post content.
 
 * ServiceDiscoveryClient
 
@@ -14,10 +14,7 @@ Scan zookeeper every 5 minutes, if node path(in the format of ip:port, aka. 1.1.
 
 * Flowchart
 
-#+BEGIN_CENTER
-#+ATTR_LATEX: :float t :placement [H] :width 6cm
-file:./MonitoringArchitecture.png
-#+END_CENTER
+[[MonitoringArchitecture.png]]
 
 * Prometheus configuration
 
