@@ -132,13 +132,14 @@ public class ZooKeeperUtil implements Watcher {
    */
   public boolean writeData(String path, String data) {
     try {
-      logger.info("更新数据成功，path：" + path + ", stat:" + this.zk.setData(path, data.getBytes(), -1));
+      logger.info("Write data successfully，path：" + path + ", "
+          + "stat:" + this.zk.setData(path, data.getBytes(), -1));
     } catch (KeeperException exception) {
-      logger.info("更新数据失败，发生KeeperException，path:" + path);
+      logger.info("Write data failed，KeeperException occured，path:" + path);
       logger.info(exception.getMessage());
       return false;
     } catch (InterruptedException exception) {
-      logger.info("更新数据失败，发生 InterruptedException，path:" + path);
+      logger.info("Write data failed，InterruptedException occured，path:" + path);
       logger.info(exception.getMessage());
       return false;
     }

@@ -1,4 +1,4 @@
-package com.citicbank.hz;
+package com.citicbank.hz.zk;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

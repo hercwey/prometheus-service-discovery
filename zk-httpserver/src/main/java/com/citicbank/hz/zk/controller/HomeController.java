@@ -1,7 +1,7 @@
 package com.citicbank.hz.zk.controller;
 
-import com.citicbank.hz.domain.PostContent;
-import com.citicbank.hz.domain.ZkNode;
+import com.citicbank.hz.zk.domain.PostContent;
+import com.citicbank.hz.zk.domain.ZkNode;
 import com.citicbank.hz.zk.util.ZooKeeperUtil;
 
 import org.springframework.beans.factory.annotation.Value;

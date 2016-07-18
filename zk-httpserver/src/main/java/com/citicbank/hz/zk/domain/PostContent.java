@@ -1,4 +1,4 @@
-package com.citicbank.hz.domain;
+package com.citicbank.hz.zk.domain;
 
 public class PostContent {
   String port;
