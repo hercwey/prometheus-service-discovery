@@ -12,7 +12,7 @@ When a node exporter start, it send a http post to ZkHttpServer, ZkHttpServer pe
 
 Scan zookeeper every 5 minutes by using crontab, if node path(in the format of ip:port, aka. 1.1.1.1:9100) is tcp reachable, then add it to prometheus tgroup json files. Prometheus watches these json files which define target groups. Whenever any of those files changes, a list of target groups is read from the files and scrape targets are extracted. 
 
-Here we use Prometheus *Custom service discovery* interface describe [[https://prometheus.io/blog/2015/06/01/advanced-service-discovery/][here]].
+Here we use Prometheus *Custom service discovery* interface describe [[https://prometheus.io/blog/2015/06/01/advanced-service-discovery/#custom-service-discovery][here]].
 
 * Flowchart
 
