@@ -2,3 +2,4 @@
 target/
 **/bootstrap.properties
 bin/
+**/.DS_Store

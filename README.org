@@ -73,7 +73,7 @@ nohup ./node_exporter -collectors.enabled conntrack,diskstats,entropy,filefd,fil
 curl -i -X POST -d '{"port": "9100", "data": "linux"}' -H "Content-Type: application/json" http://172.16.10.50/zk
 #+END_SRC
 
-* node exporter shutdown script
+* Node exporter shutdown script
 
 #+BEGIN_SRC sh
 #!bin/sh
@@ -109,4 +109,27 @@ curl -i -X DELETE -d '{"port": "9100", "data": "linux"}' -H "Content-Type: appli
     "job" : "mysql"
   }
 } ]
+#+END_SRC
+
+* Setup
+** ZkHttpServer
+*** Build
+Run *maven clean package* to build jar file. Before building, plese change *application.properties* to suit your environment.
+
+*** Target machine
+You can run ZkHttpServer on any machine with Oracle Java version 1.7 or above. ZkHttpServer on multiple machine is supported, which behind a load balancer.
+
+#+BEGIN_SRC sh
+cd /home/deploy
+nohup /usr/bin/java -jar prometheus-zk-httpserver-0.0.1-RELEASE.jar  &
+#+END_SRC
+** ServiceDiscoverClient
+*** Build
+Run *maven clean package* to build jar file. Before building, plese change *application.properties* to suit your environment.
+*** Target machine
+Oracle Java version 1.7 or above is needed on target machine. You should put runnable jar file on machine which install prometheus server. Typical setup is write a shell script, and run through crontab every 5 minutes.
+
+#+BEGIN_SRC sh
+cd /opt/prometheus-0.20.0.linux-amd64/tgroups
+nohup /usr/bin/java -jar prometheus-service-discovery-client-0.0.1-RELEASE.jar  &
 #+END_SRC
