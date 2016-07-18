@@ -1,16 +1,18 @@
 * Overview
 
-Auto discover monitoring node such as prometheus node exporter, then add it to prometheus target.
+Auto discover monitoring node such as prometheus node exporter, haproxy exporter, mysqld exporter etc. Then add them to prometheus target groups.
 
 This application contains two parts, ZkHttpServer and ServiceDiscoveryClient.
 
 * ZkHttpServer
 
-When a node exporter start, it send a http post to ZkHttpServer, ZkHttpServer persist the post content to zookeeper. Post content contain two fields: port and data. Zk Node path name is in format of [srcip]:[port], Zk Node data is the data field of post content.
+When a node exporter start, it send a http post to ZkHttpServer, ZkHttpServer persist the post content to zookeeper. Post content contain two fields: port and data. Zk Node path name is in format of [srcip]:[port](1.1.1.1:9100). Zk Node's data field is data field of the posted content.
 
 * ServiceDiscoveryClient
 
-Scan zookeeper every 5 minutes, if node path(in the format of ip:port, aka. 1.1.1.1:9100) is tcp reachable, add it to prometheus monitoring node list.
+Scan zookeeper every 5 minutes by using crontab, if node path(in the format of ip:port, aka. 1.1.1.1:9100) is tcp reachable, then add it to prometheus tgroup json files. Prometheus watches these json files which define target groups. Whenever any of those files changes, a list of target groups is read from the files and scrape targets are extracted. 
+
+Here we use Prometheus *Custom service discovery* interface describe [[https://prometheus.io/blog/2015/06/01/advanced-service-discovery/][here]].
 
 * Flowchart
 
